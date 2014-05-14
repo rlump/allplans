@@ -1,0 +1,88 @@
+install.packages("KernSmooth")
+library("KernSmooth")
+swirl()
+library(swirl)
+swirl()
+myVector <- 1:20
+myVector
+dim(myVector)
+length(myVector)
+dim(myVector) <- c(4, 5)
+dim(myVector)
+attributes(myVector)
+myVector
+class(myVector)
+myVector -> myMatrix
+?matrix
+matrix(1:20,4,5) -> myMatrix2
+identical(myMatrix,myMatrix2)
+patients <- c("Bill","Gina","Kelly","Sean")
+cbind(patients,myMatrix)
+myData <- data.frame(patients, myMatrix)
+myData
+class(myData)
+cnames <- c("patient", "age","weight", "bp", "rating", "test")
+colnames(myMatrix,cnames)
+?colnames
+colnames(myData) <- cnames
+myData
+cube
+cube <- function(x,n) {}
+cube <- function(x,n) {
+x^3
+}
+cube(3)
+x<-10
+if (x<10) {x<-0}
+if (x>5) {x<-0}
+x<-1:10
+if (x>5) {x<-0}
+f <- function(x) {}
+f <- function(x) {
+g <- function(y) {
+y+z
+}
+z<-4
+x+g(x)
+}
+z<-10
+f(3)
+f
+x <- 5
+foo <- function(x) {
+x
+}
+foo <- function() {
+x
+}
+foo()
+x <- 11
+foo()
+m <- 11
+m
+setm(n) m <<- n
+setm <- function(n) m <<- n
+m
+setm(12)
+m
+?solve
+?lappply
+?lapply
+rnorm(10)
+rnorm(100)
+?rnorm
+rnorm(10)
+?runif
+runif(4)
+runif(10)
+runif(100)
+?runif
+?str
+?apply
+?mapply
+ls()
+source("/Users/ronaldlump/RailApps/allplans/R Console.txt")
+ls()
+source("/Users/ronaldlump/RailApps/allplans/R Console.txt")
+getwd()
+getwd()
