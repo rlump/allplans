@@ -1,0 +1,9 @@
+{
+    "path" : "~/RailApps/allplans",
+    "sortOrder" : [
+        {
+            "ascending" : true,
+            "columnIndex" : 2
+        }
+    ]
+}
