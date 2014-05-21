@@ -1,5 +1,8 @@
-processWB <- function(hhsdata) {
-  
+processWB <- function(hhsdata,plans) {
+  #read.xlsx("hhsStateData.xls",sheetIndex=1) -> hhsdata
+  #plans <- read.csv("out",colClasses = "character")
+  #plans[,5] <- as.numeric(plans[,5])
+  #plans[complete.cases(plans),] -> plans
   start <- 120
   end <- nrow(hhsdata)
   as.numeric.factor <- function(x) {(as.numeric(levels(x)))[x]}
@@ -30,5 +33,16 @@ processWB <- function(hhsdata) {
   names(df) <-  c("numplans","chgmedicaid","subsidy","nosubsidy","bronze","silver","gold","platinum","catastrophic",
                   "male","female","age<18","age 18-25","age 26-34","age 35-44","age 45-54","age 55-64",
                   "age > 65","exchangetype","state","stateabb")
+  sapply(as.character(df[,"stateabb"]),function(x) {length(stateCarriers[[x]])} ) -> stateCarrierNums
+  stateCarrierNums[stateCarrierNums == 0] <- NA
+  df <- cbind(df,stateCarrierNums)
   df
+  split(plans,plans$State) -> statePlans
+  cheapRatios <- function(x) {
+    x[order(x$Premium.Adult.Individual.Age.21),] -> cheaps
+    notcat <- cheaps[cheaps$Metal.Level != "Catastrophic",]
+    #county <- notcat[]
+  }
+  lapply(statePlans,cheapRatios )[["NE"]] -> ilcheaps
+  ilcheaps
 }
