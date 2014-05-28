@@ -30,6 +30,7 @@ processWB <- function(hhsdata,plans) {
   c(state.abb[1:8],"DC","FFM",state.abb[9:50]) -> statesAbb
   df <- df[order(df$state),]
   df <- cbind(df,statesAbb)
+
   names(df) <-  c("numplans","chgmedicaid","subsidy","nosubsidy","bronze","silver","gold","platinum","catastrophic",
                   "male","female","age<18","age 18-25","age 26-34","age 35-44","age 45-54","age 55-64",
                   "age > 65","exchangetype","state","stateabb")
@@ -37,12 +38,4 @@ processWB <- function(hhsdata,plans) {
   stateCarrierNums[stateCarrierNums == 0] <- NA
   df <- cbind(df,stateCarrierNums)
   df
-  split(plans,plans$State) -> statePlans
-  cheapRatios <- function(x) {
-    x[order(x$Premium.Adult.Individual.Age.21),] -> cheaps
-    notcat <- cheaps[cheaps$Metal.Level != "Catastrophic",]
-    #county <- notcat[]
-  }
-  lapply(statePlans,cheapRatios )[["NE"]] -> ilcheaps
-  ilcheaps
 }
