@@ -37,5 +37,6 @@ processWB <- function(hhsdata,plans) {
   sapply(as.character(df[,"stateabb"]),function(x) {length(stateCarriers[[x]])} ) -> stateCarrierNums
   stateCarrierNums[stateCarrierNums == 0] <- NA
   df <- cbind(df,stateCarrierNums)
+  df[,"nosubsidy"]/(df[,"subsidy"] + df[,"nosubsidy"]) -> df$nosubFraction
   df
 }
