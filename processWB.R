@@ -3,6 +3,7 @@ processWB <- function(hhsdata,plans) {
   #plans <- read.csv("out",colClasses = "character")
   #plans[,5] <- as.numeric(plans[,5])
   #plans[complete.cases(plans),] -> plans
+  #statePops <- read.csv("./statepop.csv")
   start <- 120
   end <- nrow(hhsdata)
   as.numeric.factor <- function(x) {(as.numeric(levels(x)))[x]}
@@ -38,5 +39,6 @@ processWB <- function(hhsdata,plans) {
   stateCarrierNums[stateCarrierNums == 0] <- NA
   df <- cbind(df,stateCarrierNums)
   df[,"nosubsidy"]/(df[,"subsidy"] + df[,"nosubsidy"]) -> df$nosubFraction
+  df <- cbind(df,statePops)
   df
 }
