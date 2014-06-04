@@ -3,11 +3,22 @@
 #processWB(hhsdata,plans) -> stateSummary
 
 processCountyPlans <- function(ctyplans) {
+ 
+  state = ctyplans[1,"State"]
   populousCounties[[ctyplans[1,"State"]]] -> popCounties
+  countyPop = popCounties[charmatch(ctyplans[,2],popCounties$CTYNAME),"CENSUS2010POP"][1]
+  statePop = stateSummary[stateSummary$stateabb == state,"Pop"]
+  bronzeFraction = stateSummary[stateSummary$stateabb == state,"bronze"]*countyPop/statePop
+  silverFraction = stateSummary[stateSummary$stateabb == state,"silver"]*countyPop/statePop
+  goldFraction = stateSummary[stateSummary$stateabb == state,"gold"]*countyPop/statePop
+    
+  
   ctybronze <- ctyplans[which(ctyplans$Metal.Level=="Bronze" & !is.na(charmatch(ctyplans[,2],popCounties$CTYNAME))),]
   ctysilver <- ctyplans[which(ctyplans$Metal.Level=="Silver" & !is.na(charmatch(ctyplans[,2],popCounties$CTYNAME))),]
   ctygold <- ctyplans[which(ctyplans$Metal.Level=="Gold" & !is.na(charmatch(ctyplans[,2],popCounties$CTYNAME))),]
   if (nrow(ctybronze) != 0) {
+    
+    
     ctybronze[order(ctybronze$Premium.Adult.Individual.Age.40),] -> ctybronze
     ctybronzeprc <- ctybronze[,"Premium.Adult.Individual.Age.40"]
     ctybronzenumplans <- length(ctybronze[,"Premium.Adult.Individual.Age.40"])
@@ -30,8 +41,12 @@ processCountyPlans <- function(ctyplans) {
     competitiveCarriersgold <- ctygold[which(ctygold$Premium.Adult.Individual.Age.40<competitiveCutoffgold),"Issuer.Name"]
     
     list(#nrow(ctybronze),
+      #class =  class(ctyplans),
+      state = state,
+      bronzeFraction = bronzeFraction,
       numCarriersBronze = numCarriers,
       numCarriersSilver = numCarriersSilver,
+      numCarriersgold = numCarriersgold,
       countyPop = popCounties[charmatch(ctyplans[,2],popCounties$CTYNAME),"CENSUS2010POP"][1],
       medianctybronzeprc = median(ctybronzeprc),
       meanctybronzeprc = mean(ctybronzeprc),
@@ -39,26 +54,28 @@ processCountyPlans <- function(ctyplans) {
       maxctybronzeprc = max(ctybronzeprc),
       minctybronzeprc = min(ctybronzeprc),
       ctybronzenumplans = ctybronzenumplans,
-      ctybronzeprc = ctybronzeprc,
-      uniqCarriers = unique(competitiveCarriers),
+      #ctybronzeprc = ctybronzeprc,
+      competitiveBronze = length(unique(competitiveCarriers)),
       
+      silverFraction = silverFraction,
       medianctysilverprc = median(ctysilverprc),
       meanctysilverprc = mean(ctysilverprc),
       sdctysilverprc = sd(ctysilverprc),
       maxctysilverprc = max(ctysilverprc),
       minctysilverprc = min(ctysilverprc),
       ctysilvernumplans = ctysilvernumplans,
-      ctysilverprc = ctysilverprc,
-      uniqCarriersSilver = unique(competitiveCarriersSilver),
+      #ctysilverprc = ctysilverprc,
+      competitiveSilver = length(unique(competitiveCarriersSilver)),
      
+      goldFraction = goldFraction,
       medianctygoldprc = median(ctygoldprc),
       meanctygoldprc = mean(ctygoldprc),
       sdctygoldprc = sd(ctygoldprc),
       maxctygoldprc = max(ctygoldprc),
       minctygoldprc = min(ctygoldprc),
       ctygoldnumplans = ctygoldnumplans,
-      ctygoldprc = ctygoldprc,
-      uniqCarriersgold = unique(competitiveCarriersgold)
+      #ctygoldprc = ctygoldprc,
+      competitiveGold = length(unique(competitiveCarriersgold))
       
     )
   }
@@ -70,6 +87,7 @@ processStatePlans <- function(stateplans) {
   by(stateplans,stateplans$County,processCountyPlans) -> cty
   #lapply(cty, function(x) { if (!is.null(x[[1]])) x[[1]] } ) -> fff
   cty[!sapply(cty, is.null)] -> cty
+  ldply (cty, data.frame)
   #processWB(hhsdata,plans) -> stateSummary
   #lapply(cty, summaryCtyPlans)
 
@@ -77,6 +95,7 @@ processStatePlans <- function(stateplans) {
 
 summaryStatePlans <-function() {
   #plans <- read.csv("out",colClasses = "character")
-  by(plans,plans$State,processStatePlans)
+  by(plans,plans$State,processStatePlans) -> lll
+  ldply (lll, data.frame)
   
 }
