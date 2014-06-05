@@ -21,7 +21,8 @@ processCounties <- function(counties) {
     while (sum(cty[1:i,8]) < statepop*0.8) {
       i <- i + 1
     }
-    cty[1:i,(c(6,7,8))]
+    #cty[1:i,(c(6,7,8))]
+    cty[,c(6,7,8)]
   }
   
   by(counties,counties$state.abb,getPopulousCounties)

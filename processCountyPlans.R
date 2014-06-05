@@ -5,7 +5,7 @@
 processCountyPlans <- function(ctyplans) {
  
   state = ctyplans[1,"State"]
-  populousCounties[[ctyplans[1,"State"]]] -> popCounties
+  allCounties[[ctyplans[1,"State"]]] -> popCounties
   countyPop = popCounties[charmatch(ctyplans[,2],popCounties$CTYNAME),"CENSUS2010POP"][1]
   statePop = stateSummary[stateSummary$stateabb == state,"Pop"]
   bronzeFraction = stateSummary[stateSummary$stateabb == state,"bronze"]*countyPop/statePop
@@ -23,22 +23,45 @@ processCountyPlans <- function(ctyplans) {
     ctybronzeprc <- ctybronze[,"Premium.Adult.Individual.Age.40"]
     ctybronzenumplans <- length(ctybronze[,"Premium.Adult.Individual.Age.40"])
     numCarriers <- length(unique(ctybronze[,"Issuer.Name"]))
-    competitiveCutoff <- min(ctybronzeprc) + sd(ctybronzeprc)
-    competitiveCarriers <- ctybronze[which(ctybronze$Premium.Adult.Individual.Age.40<competitiveCutoff),"Issuer.Name"]
+    competitiveCutoff <- min(ctybronzeprc) + ifelse(is.na(sd(ctybronzeprc)),0,sd(ctybronzeprc))
+    competitiveCarriers <- ctybronze[which(ctybronze$Premium.Adult.Individual.Age.40<=competitiveCutoff),"Issuer.Name"]
+  
     
     ctysilver[order(ctysilver$Premium.Adult.Individual.Age.40),] -> ctysilver
     ctysilverprc <- ctysilver[,"Premium.Adult.Individual.Age.40"]
     ctysilvernumplans <- length(ctysilver[,"Premium.Adult.Individual.Age.40"])
     numCarriersSilver <- length(unique(ctysilver[,"Issuer.Name"]))
     competitiveCutoffsilver <- min(ctysilverprc) + sd(ctysilverprc)
-    competitiveCarriersSilver <- ctysilver[which(ctysilver$Premium.Adult.Individual.Age.40<competitiveCutoffsilver),"Issuer.Name"]
+    competitiveCarriersSilver <- ctysilver[which(ctysilver$Premium.Adult.Individual.Age.40<=competitiveCutoffsilver),"Issuer.Name"]
     
     ctygold[order(ctygold$Premium.Adult.Individual.Age.40),] -> ctygold
     ctygoldprc <- ctygold[,"Premium.Adult.Individual.Age.40"]
     ctygoldnumplans <- length(ctygold[,"Premium.Adult.Individual.Age.40"])
     numCarriersgold <- length(unique(ctygold[,"Issuer.Name"]))
     competitiveCutoffgold <- min(ctygoldprc) + sd(ctygoldprc)
-    competitiveCarriersgold <- ctygold[which(ctygold$Premium.Adult.Individual.Age.40<competitiveCutoffgold),"Issuer.Name"]
+    competitiveCarriersgold <- ctygold[which(ctygold$Premium.Adult.Individual.Age.40<=competitiveCutoffgold),"Issuer.Name"]
+    
+    competitiveCarrier1 = as.character(NA)
+    competitiveCarrier2 = as.character(NA) 
+    competitiveCarrier3 = as.character(NA) 
+    competitiveCarrier4 = as.character(NA)
+    competitiveCarrier5 = as.character(NA)
+    competitiveCarrier6 = as.character(NA) 
+    
+    i <- 1
+    unique(competitiveCarriers) -> uniqCarriers
+    if (length(uniqCarriers) > 6) {
+      uniqCarriers <- uniqCarriers[1:6,]
+    }
+    for (cc in unique(competitiveCarriers)) {
+      if (i ==1) {competitiveCarrier1 <- cc}
+      if (i ==2) {competitiveCarrier2 <- cc}
+      if (i ==3) {competitiveCarrier3 <- cc}
+      if (i ==4) {competitiveCarrier4 <- cc}
+      if (i ==5) {competitiveCarrier5 <- cc}
+      if (i ==6) {competitiveCarrier6 <- cc}
+      i <- i + 1
+    }
     
     list(#nrow(ctybronze),
       #class =  class(ctyplans),
@@ -46,6 +69,8 @@ processCountyPlans <- function(ctyplans) {
       bronzeFraction = bronzeFraction,
       numCarriersBronze = numCarriers,
       numCarriersSilver = numCarriersSilver,
+      #competitiveCarriers = unique(competitiveCarriers),
+      
       numCarriersgold = numCarriersgold,
       countyPop = popCounties[charmatch(ctyplans[,2],popCounties$CTYNAME),"CENSUS2010POP"][1],
       medianctybronzeprc = median(ctybronzeprc),
@@ -75,7 +100,13 @@ processCountyPlans <- function(ctyplans) {
       minctygoldprc = min(ctygoldprc),
       ctygoldnumplans = ctygoldnumplans,
       #ctygoldprc = ctygoldprc,
-      competitiveGold = length(unique(competitiveCarriersgold))
+      competitiveGold = length(unique(competitiveCarriersgold)),
+      compCarrier1 = competitiveCarrier1,
+      compCarrier2 = competitiveCarrier2,
+      compCarrier3 = competitiveCarrier3,
+      compCarrier4 = competitiveCarrier4,
+      compCarrier5 = competitiveCarrier5,
+      compCarrier6 = competitiveCarrier6
       
     )
   }
