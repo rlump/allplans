@@ -118,15 +118,48 @@ processStatePlans <- function(stateplans) {
   by(stateplans,stateplans$County,processCountyPlans) -> cty
   #lapply(cty, function(x) { if (!is.null(x[[1]])) x[[1]] } ) -> fff
   cty[!sapply(cty, is.null)] -> cty
-  ldply (cty, data.frame)
-  #processWB(hhsdata,plans) -> stateSummary
-  #lapply(cty, summaryCtyPlans)
+  ldply (cty, data.frame) -> ctydf
+  ctydf <- ctydf[is.na(ctydf$compCarrier3),]
 
+}
+
+marketSummaryStatePlans <-function() {
+  #plans <- read.csv("out",colClasses = "character")
+  by(plans,plans$State,processStatePlans) -> lll
+  ldply (lll, data.frame) -> lll
+  ddply(lll,.(state,compCarrier1,compCarrier2),summarize,
+        marketSize = sum(bronzeFraction*meanctybronzeprc,na.rm = TRUE)
+        + sum(silverFraction*meanctysilverprc,na.rm = TRUE) 
+        + sum(goldFraction*meanctygoldprc,na.rm = TRUE) ) -> mkt
+  mkt[order(mkt$state,-mkt$marketSize),]
 }
 
 summaryStatePlans <-function() {
   #plans <- read.csv("out",colClasses = "character")
   by(plans,plans$State,processStatePlans) -> lll
-  ldply (lll, data.frame)
+  ldply (lll, data.frame) 
   
 }
+
+processBestCarrierTargets <- function(df) {
+  as.character(df[,"compCarrier1"])
+  carriers <- c(as.character(df[,"compCarrier1"]),as.character(df[,"compCarrier2"]))
+  
+  carriers <- carriers[complete.cases(carriers)]
+  length(carriers)
+  uniqCarriers <- unique(carriers)
+  length(uniqCarriers)
+  if (length(uniqCarriers)>2) {
+    combinations(length(uniqCarriers),2,uniqCarriers) -> uc
+    df[df$compCarrier1 == uc[1,1]&df$compCarrier2 == uc[1,2],][,"marketSize"]
+  } else {
+    2
+  }
+  
+}
+
+bestCarrierTargets <- function(mkt = NULL) {
+  if (is.null(mkt)) {mkt <- marketSummaryStatePlans()}
+  dlply(mkt,.(state),processBestCarrierTargets)
+}
+
