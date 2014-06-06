@@ -6,6 +6,7 @@ processCountyPlans <- function(ctyplans) {
  
   state = ctyplans[1,"State"]
   allCounties[[ctyplans[1,"State"]]] -> popCounties
+  gsub(" COUNTY$","",popCounties[,"CTYNAME"]) -> popCounties[,"CTYNAME"]
   countyPop = popCounties[charmatch(ctyplans[,2],popCounties$CTYNAME),"CENSUS2010POP"][1]
   statePop = stateSummary[stateSummary$stateabb == state,"Pop"]
   bronzeFraction = stateSummary[stateSummary$stateabb == state,"bronze"]*countyPop/statePop
