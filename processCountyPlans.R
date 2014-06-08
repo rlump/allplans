@@ -152,7 +152,30 @@ processBestCarrierTargets <- function(df) {
   length(uniqCarriers)
   if (length(uniqCarriers)>2) {
     combinations(length(uniqCarriers),2,uniqCarriers) -> uc
-    df[df$compCarrier1 == uc[1,1]&df$compCarrier2 == uc[1,2],][,"marketSize"]
+    dfreturn = data.frame()
+    max <- 0
+    idMax <- numeric(0)
+    for (i in 1:nrow(uc)) {
+      localMax <- 0
+      idLocal <- numeric(0)
+      for (j in 1:nrow(df)) {
+        if ( (df[j,"compCarrier1"] == uc[i,1] && is.na(df[j,"compCarrier2"])) ||
+          (df[j,"compCarrier1"] == uc[i,2] && is.na(df[j,"compCarrier2"])) ||
+          (df[j,"compCarrier1"] == uc[i,1] && df[j,"compCarrier2"] == uc[i,2]) ||
+          (df[j,"compCarrier1"] == uc[i,2] && df[j,"compCarrier2"] == uc[i,1])) {
+            localMax <- localMax + df[j,"marketSize"]
+            idLocal <- c(idLocal,j)
+        }
+      }
+      if (localMax > max) {
+        max <- localMax
+        idMax <- idLocal
+      }
+    }
+    for (i in idMax) {
+      dfreturn <- rbind(dfreturn,df[i,])
+    }
+    dfreturn
   } else {
     2
   }
