@@ -131,13 +131,25 @@ marketSummaryStatePlans <-function() {
   ddply(lll,.(state,compCarrier1,compCarrier2),summarize,
         marketSize = sum(bronzeFraction*meanctybronzeprc,na.rm = TRUE)
         + sum(silverFraction*meanctysilverprc,na.rm = TRUE) 
-        + sum(goldFraction*meanctygoldprc,na.rm = TRUE) ) -> mkt
+        + sum(goldFraction*meanctygoldprc,na.rm = TRUE),
+        numPlans = sum(bronzeFraction) + sum(silverFraction) + sum(goldFraction)) -> mkt
+        
   mkt[order(mkt$state,-mkt$marketSize),]
+}
+
+processAllStatePlans <- function(stateplans) {
+  
+  by(stateplans,stateplans$County,processCountyPlans) -> cty
+  #lapply(cty, function(x) { if (!is.null(x[[1]])) x[[1]] } ) -> fff
+  cty[!sapply(cty, is.null)] -> cty
+  ldply (cty, data.frame) -> ctydf
+  #ctydf <- ctydf[is.na(ctydf$compCarrier3),]
+  
 }
 
 summaryStatePlans <-function() {
   #plans <- read.csv("out",colClasses = "character")
-  by(plans,plans$State,processStatePlans) -> lll
+  by(plans,plans$State,processAllStatePlans) -> lll
   ldply (lll, data.frame) 
   
 }
@@ -150,40 +162,56 @@ processBestCarrierTargets <- function(df) {
   length(carriers)
   uniqCarriers <- unique(carriers)
   length(uniqCarriers)
-  if (length(uniqCarriers)>2) {
-    combinations(length(uniqCarriers),2,uniqCarriers) -> uc
+  #if (length(uniqCarriers)>=2) {
+    uc <- matrix()
+    if (length(uniqCarriers)>2) {
+      combinations(length(uniqCarriers),2,uniqCarriers) -> uc
+    } else if (length(uniqCarriers)==2) {
+      uc = matrix(uniqCarriers,nrow=1)
+    } else {
+      uc = matrix(c(uniqCarriers,"NULL CARRIER"),nrow=1)
+    }
     dfreturn = data.frame()
+    ucMax <- character()
     max <- 0
-    idMax <- numeric(0)
+    numPlans <- 0
+    idMax <- numeric()
     for (i in 1:nrow(uc)) {
       localMax <- 0
       idLocal <- numeric(0)
+      localNumPlans <- 0
       for (j in 1:nrow(df)) {
         if ( (df[j,"compCarrier1"] == uc[i,1] && is.na(df[j,"compCarrier2"])) ||
           (df[j,"compCarrier1"] == uc[i,2] && is.na(df[j,"compCarrier2"])) ||
           (df[j,"compCarrier1"] == uc[i,1] && df[j,"compCarrier2"] == uc[i,2]) ||
           (df[j,"compCarrier1"] == uc[i,2] && df[j,"compCarrier2"] == uc[i,1])) {
             localMax <- localMax + df[j,"marketSize"]
+            localNumPlans <- localNumPlans + df[j,"numPlans"]
             idLocal <- c(idLocal,j)
         }
       }
       if (localMax > max) {
         max <- localMax
+        numPlans <- localNumPlans
         idMax <- idLocal
+        ucMax <- uc[i,]
       }
     }
     for (i in idMax) {
       dfreturn <- rbind(dfreturn,df[i,])
     }
-    dfreturn
-  } else {
-    2
-  }
+    #dfreturn
+    list(carrier1 = ucMax[1], carrier2 = ucMax[2], max = max, numPlans = numPlans) -> bests
+    
+  #} else {
+   # 2
+  #}
   
 }
 
 bestCarrierTargets <- function(mkt = NULL) {
   if (is.null(mkt)) {mkt <- marketSummaryStatePlans()}
-  dlply(mkt,.(state),processBestCarrierTargets)
+  dlply(mkt,.(state),processBestCarrierTargets) -> bests
+  ldply (bests, data.frame) 
 }
 
