@@ -147,10 +147,32 @@ processAllStatePlans <- function(stateplans) {
   
 }
 
+allStatePlansByCounty <-function() {
+  #plans <- read.csv("out",colClasses = "character")
+  by(plans,plans$State,processAllStatePlans) -> lll
+  ldply (lll, data.frame)
+}
+
 summaryStatePlans <-function() {
   #plans <- read.csv("out",colClasses = "character")
   by(plans,plans$State,processAllStatePlans) -> lll
-  ldply (lll, data.frame) 
+  ldply (lll, data.frame) -> lll
+  ddply(lll,.(state),summarize,
+        marketSize = sum(bronzeFraction*meanctybronzeprc,na.rm = TRUE)
+        + sum(silverFraction*meanctysilverprc,na.rm = TRUE) 
+        + sum(goldFraction*meanctygoldprc,na.rm = TRUE),
+        numPlans = sum(bronzeFraction,na.rm = TRUE) + sum(silverFraction,na.rm = TRUE) + sum(goldFraction,na.rm = TRUE)) -> bests
+  
+  #mkt[order(mkt$state,-mkt$marketSize),]
+  read.csv("./brokercomp.csv") -> brokerComps
+  cbind(brokerComps,state.abb) -> brokerComps
+  subset(brokerComps,select = c(ind,state.abb)) -> brokerComps
+  
+  names(brokerComps)[2] <- "state"
+  merge(bests,brokerComps) ->bests
+  bestsCommissions
+  bests[,"numPlans"]*bests[,"ind"] -> bests$relVal
+  bests[order(-bests$relVal),]
   
 }
 
@@ -212,6 +234,15 @@ processBestCarrierTargets <- function(df) {
 bestCarrierTargets <- function(mkt = NULL) {
   if (is.null(mkt)) {mkt <- marketSummaryStatePlans()}
   dlply(mkt,.(state),processBestCarrierTargets) -> bests
-  ldply (bests, data.frame) 
+  ldply (bests, data.frame) -> bests
+  read.csv("./brokercomp.csv") -> brokerComps
+  cbind(brokerComps,state.abb) -> brokerComps
+  subset(brokerComps,select = c(ind,state.abb)) -> brokerComps
+  
+  names(brokerComps)[2] <- "state"
+  merge(bests,brokerComps) ->bests
+  bestsCommissions
+  bests[,"numPlans"]*bests[,"ind"] -> bests$relVal
+  bests[order(-bests$relVal),]
 }
 
