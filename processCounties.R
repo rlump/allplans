@@ -1,4 +1,4 @@
-processCounties <- function(counties) {
+processCounties <- function(counties,all = FALSE) {
   #counties <- read.csv("./CO-EST2013-Alldata.csv")
   
   # remove bad county dona ana, nm
@@ -22,7 +22,11 @@ processCounties <- function(counties) {
       i <- i + 1
     }
     #cty[1:i,(c(6,7,8))]
-    cty[,c(6,7,8)]
+    if (all) {
+      cty[,c(6,7,8)]
+    } else {
+      cty[1:i,(c(6,7,8))]
+    }
   }
   
   by(counties,counties$state.abb,getPopulousCounties)

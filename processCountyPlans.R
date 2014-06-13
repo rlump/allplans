@@ -1,6 +1,7 @@
 # globals expected
 # processCounties(counties) -> populousCounties
 #processWB(hhsdata,plans) -> stateSummary
+#counties <- read.csv("./CO-EST2013-Alldata.csv")
 
 processCountyPlans <- function(ctyplans) {
  
@@ -124,8 +125,9 @@ processStatePlans <- function(stateplans) {
 
 }
 
-marketSummaryStatePlans <-function() {
+marketSummaryStatePlans <-function(all = FALSE) {
   #plans <- read.csv("out",colClasses = "character")
+  processCounties(counties,all) ->> allCounties
   by(plans,plans$State,processStatePlans) -> lll
   ldply (lll, data.frame) -> lll
   ddply(lll,.(state,compCarrier1,compCarrier2),summarize,
@@ -149,12 +151,14 @@ processAllStatePlans <- function(stateplans) {
 
 allStatePlansByCounty <-function() {
   #plans <- read.csv("out",colClasses = "character")
+  processCounties(counties,TRUE) ->> allCounties
   by(plans,plans$State,processAllStatePlans) -> lll
   ldply (lll, data.frame)
 }
 
-summaryStatePlans <-function() {
+summaryAllStatePlans <-function() {
   #plans <- read.csv("out",colClasses = "character")
+  processCounties(counties,TRUE) ->> allCounties
   by(plans,plans$State,processAllStatePlans) -> lll
   ldply (lll, data.frame) -> lll
   ddply(lll,.(state),summarize,
@@ -170,7 +174,6 @@ summaryStatePlans <-function() {
   
   names(brokerComps)[2] <- "state"
   merge(bests,brokerComps) ->bests
-  bestsCommissions
   bests[,"numPlans"]*bests[,"ind"] -> bests$relVal
   bests[order(-bests$relVal),]
   
@@ -240,8 +243,7 @@ bestCarrierTargets <- function(mkt = NULL) {
   subset(brokerComps,select = c(ind,state.abb)) -> brokerComps
   
   names(brokerComps)[2] <- "state"
-  merge(bests,brokerComps) ->bests
-  bestsCommissions
+  merge(bests,brokerComps) ->bests 
   bests[,"numPlans"]*bests[,"ind"] -> bests$relVal
   bests[order(-bests$relVal),]
 }
